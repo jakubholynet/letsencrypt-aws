@@ -1,7 +1,7 @@
 # letsencrypt-aws
 
 `letsencrypt-aws` is a program that can be run in the background which
-automatically provisions and updates certificates on your AWS infrastructure
+automatically updates certificates on your AWS infrastructure
 using the AWS APIs and Let's Encrypt.
 
 ## How it works
@@ -15,6 +15,10 @@ request to Let's Encrypt. It takes the DNS challenge and creates a record in
 Route53 for that challenge. This completes the Let's Encrypt challenge and we
 receive a certificate. It uploads the new certificate and private key to IAM
 and updates your ELB to use the certificate.
+
+The ELB in question already has to be configured with a SSL certificate (though it 
+doesn't need to be a Let's Encrypt certificate) and listen on the port (443 by default).
+(Iits expiry date is checked to see whether renewal is necessary.)
 
 In theory all you need to do is make sure this is running somewhere, and your
 ELBs' certificates will be kept minty fresh.
