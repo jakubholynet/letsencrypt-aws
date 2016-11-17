@@ -21,6 +21,8 @@ ELBs' certificates will be kept minty fresh.
 
 ## How to run it
 
+### Locally
+
 Before you can use `letsencrypt-aws` you need to have created an account with
 the ACME server (you only need to do this the first time). You can register
 using (if you already have an account you can skip this step):
@@ -81,9 +83,44 @@ useful for production environments.
 If your certificate is not expiring soon, but you need to issue a new one
 anyways, the `--force-issue` flag can be provided.
 
+### Via Docker
+
 If you're into [Docker](https://www.docker.com/), there is an automatically
 built image of `letsencrypt-aws` available as
 [`alexgaynor/letsencrypt-aws`](https://hub.docker.com/r/alexgaynor/letsencrypt-aws/).
+
+These instructions show how to perform the same steps as done locally but using the Docker image.
+
+1\. Register: 
+
+    docker run -it --rm  alexgaynor/letsencrypt-aws register me@example.com
+
+2\. Prepare the private key and inputs:
+
+Store the private key into `./acme.key` and create `input.json` pointing to `/host/acme.key`, f.ex.:
+
+```json
+{
+    "domains": [
+        {
+            "elb": {
+                "name": "awseb-c-g-AWSEBRou-YX5DH4VKS5EB"
+            },
+            "hosts": ["awesome.example.com"]
+        }
+    ],
+    "acme_account_key": "file:///host/acme.key"
+}
+```
+
+3\. Renew the certificate:
+
+```bash
+docker run -it --rm  -v $(pwd):/host -v ~/.aws:/aws -e "LETSENCRYPT_AWS_CONFIG=$(cat input.json)" -e "AWS_SHARED_CREDENTIALS_FILE=/aws/credentials" -e "AWS_CONFIG_FILE=/aws/config" alexgaynor/letsencrypt-aws
+```
+
+Note: We map the current directory (with the key) to `/host` and your `~/.aws` with credentials and config to `/aws`. If you want to use another way of configuring Boto, adjust accordingly. 
+
 
 ## Operational Security
 
